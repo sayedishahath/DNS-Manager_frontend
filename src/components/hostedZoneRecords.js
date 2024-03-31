@@ -131,7 +131,7 @@ export default function Records(){
     
     return(
         <div className='App'>
-            {hostedZone.domain&&(
+            {(
             <div className='row justify-content-center'>
             <div className='col-md-4'>
             <h2>create record for - {hostedZoneId.name} </h2>

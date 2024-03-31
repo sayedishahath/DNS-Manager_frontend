@@ -44,6 +44,7 @@ function App() {
       localStorage.removeItem('token')
     }
   }
+  
   useEffect(()=>{
     (async()=>{
       try{
@@ -57,7 +58,8 @@ function App() {
         console.log(err)
       }
     })()
-  },[])
+  },[dispatchHostedZone])
+
   return (
     <div className="App">
       <BrowserRouter>
@@ -69,6 +71,7 @@ function App() {
               <Route path="/login" element={<Login loginSuccess={loginSuccess} />} />
               <Route path='/hostedZone' element={<HostedZone/>}/>
               <Route path = '/hosted-zone/:zoneId/record' element={<Records/>}/>
+              <Route path = '/logout' element ={<Login loginSuccess={loginSuccess}/>}/>
             </Routes>
           {userLoggedIn&&<Link to ='/logout' onClick={logout}>logout</Link>}
           </UserContext.Provider>
