@@ -1,18 +1,18 @@
 import axios from 'axios'
 import _ from 'lodash'
-import { UserContext } from "../context/userContext";
+
 import { useParams } from "react-router-dom";
-import { useContext,useEffect,useState } from "react";
+import { useEffect,useState } from "react";
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 
-export default function Records(){
+export default function Records(props){
     const [modal, setModal] = useState(false);
     const toggle = () => {
         setModal(!modal)
     }
     const {zoneId} = useParams()
-    const {hostedZone} =useContext(UserContext)
-    const hostedZoneId = hostedZone.domain.find((ele)=>{
+    const {hostedZone} = props
+    const hostedZoneId = hostedZone.find((ele)=>{
         return ele.zoneId ===zoneId
     })
     const [editId,setEditId] = useState('')
@@ -22,6 +22,7 @@ export default function Records(){
     })
     console.log(dnsRecord)
     const [search,setSeacrh] = useState('')
+    const [domain,setDomain] =useState('')
     const [recordType, setRecordType] = useState(dnsRecord?dnsRecord.recordType:'');
     const [recordValue, setRecordValue] = useState(dnsRecord?dnsRecord.recordValue:'');
     const [ttl, setTtl] = useState( dnsRecord?dnsRecord.ttl:'');
@@ -29,6 +30,9 @@ export default function Records(){
     
     const errors = {}
     const validateErrors = ()=>{
+        if(domain.trim().length===0){
+            errors.domain ='domain is required'
+        }
         if(recordType.trim().length === 0){
             errors.recordType = 'record type is required'
         }
@@ -72,9 +76,9 @@ export default function Records(){
                 alert(err.message)
             }
         })()
-    },[zoneId])
+    },[])
     const formData={
-        domain: hostedZoneId.name,
+        domain: domain,
         recordType: recordType,
         recordValue: recordValue,
         ttl : ttl
@@ -90,9 +94,10 @@ export default function Records(){
             console.log(response);
             setFormErrors({})
             alert('new record added')
+            setDnsRecords([...dnsRecords,response.data]);
         }catch(err){
             setFormErrors({})
-            console.log(err);
+            // console.log(err);
             alert(err.response.data.error.message)
         }
     }else{
@@ -107,11 +112,14 @@ export default function Records(){
             const response = await axios.delete(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneid}/${id}`,{headers:{
                 Authorization:localStorage.getItem('token')
             }})
-            console.log(response.data)
+            // console.log(response.data)
             alert('record deleted successfully')
+            setDnsRecords(dnsRecord.filter((ele)=>{
+                return ele.deleteDNSRecord._id !==id
+            })) 
         }catch(err){
-            alert(err.response.data.message)
-            console.log(err.response.data)
+            alert(err.response.data)
+            // console.log(err.response.data)
         }
        }
     }
@@ -123,6 +131,14 @@ export default function Records(){
             }})
             console.log(response.data)
             alert('record updated successfully')
+            setDnsRecords(dnsRecords.map((ele)=> {
+               if (ele._id === id) {
+                   return response.data
+               } else {
+                   return ele;
+               }
+           })
+          )
         }catch(err){
             alert(err.message)
             console.log(err)
@@ -131,19 +147,22 @@ export default function Records(){
     
     return(
         <div className='App'>
-            {(
+            
             <div className='row justify-content-center'>
             <div className='col-md-4'>
-            <h2>create record for - {hostedZoneId.name} </h2>
+            <h2>create record -{hostedZoneId&&hostedZoneId.name}</h2>
             <form onSubmit={handleSubmit}>
-                {/* <label htmlFor="domain">Domain:</label>
+                <div className='form-group'>
+                <label className='form-label' htmlFor="domain">Domain:</label>
                 <input type="text" 
                 id="domain" 
                 name='domain'
                 value={domain}
-                onChange={(e) => setDomain(e.target.value)} /> */}
+                onChange={(e) => setDomain(e.target.value)} 
+                className='form-control'/>
+                </div>
                 <div className='form-group'>
-                <label className='form-lable' htmlFor="recordType">Record Type:</label>
+                <label className='form-label' htmlFor="recordType">Record Type:</label>
                     <select 
                     id="recordType" 
                     value={recordType} 
@@ -203,7 +222,7 @@ export default function Records(){
                 </div>
             </form>
             </div>
-            </div>)}
+            </div>
             <select 
                     id="search" 
                     value={search} 
@@ -269,6 +288,15 @@ export default function Records(){
             <form onSubmit={(e)=>{
                 handleUpdate(e,editId)
             }}>    
+                    
+                    <label htmlFor="domain">Domain:</label>
+                    <input type="text" 
+                    id="domain" 
+                    name='domain'
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)} 
+                    />
+                
                     <label htmlFor="recordType">Record Type:</label>
                         <select 
                         id="recordType" 

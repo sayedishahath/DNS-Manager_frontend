@@ -2,8 +2,10 @@ import axios from 'axios'
 import { useState } from 'react'
 import _ from 'lodash'
 import { useNavigate } from 'react-router-dom'
+import { useUserContext } from '../context/userContext';
 export default function Login(props){
     const navigate = useNavigate()
+    const { dispatch } = useUserContext();
     const [email,setEmail]=useState('')
     const [password, setPassword] = useState('')
     const [loggedInUser,setLoggedInUser] = useState(null)
@@ -41,18 +43,12 @@ export default function Login(props){
                 props.loginSuccess()
                 setEmail('')
                 setPassword('')
-                navigate('/hostedZone')
                 setServerError("")
+                dispatch({ type: 'LOGIN' }); // Dispatch login action
+                navigate('/hostedZone')
             }catch(err){
                 alert(err)
                 const errors = err.response.data.error
-                // const serverErrors= {}
-                // serverErrors.email=errors.find((e)=>{
-                //     return e.path==='email'
-                // })
-                // serverErrors.password=errors.find((e)=>{
-                //     return e.path==='password'
-                // })
                 console.log(serverError)
                 setServerError(errors)
                 setFormError({})
@@ -62,7 +58,6 @@ export default function Login(props){
             setServerError("")
             console.log(formError)
         }
-       
     }
     return(
         <div>
@@ -94,9 +89,7 @@ export default function Login(props){
                 }} 
                 className={'form-control' + (formError.password ||serverError.password?  ' is-invalid' : '')}/>
                 {formError.password&&<span className='invalid-feedback'>{formError.password}</span>}
-                
                 <input type="submit" value="Login" className='btn btn-primary' />
-
             </form></div>
             </div>
             <hr/>

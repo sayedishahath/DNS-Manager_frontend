@@ -1,15 +1,27 @@
-import { useState } from "react"
+import { useState,useEffect} from "react"
 import _ from "lodash"
 import axios from 'axios'
 import { Link } from "react-router-dom"
-import{useContext} from 'react'
-import { UserContext } from '../context/userContext'
-export default function HostedZone (){
-    const {hostedZone,dispatchHostedZone} = useContext(UserContext)
+export default function HostedZone (props){
+    const {hostedZone,setHostedZone} =props
     const [domain,setDomain] =useState('')
     const [file, setFile] = useState(null);
     const [search,setSeacrh]= useState('')
     const [formErrors,setFormErrors]=useState({})
+
+    useEffect(()=>{
+        (async()=>{
+          try{
+            const response = await axios.get('https://dns-manager-x1h3.onrender.com/api/domain',{headers:{
+              Authorization:localStorage.getItem('token')
+            }})
+            setHostedZone(response.data)
+          }catch(err){
+            alert(err.message)
+            console.log(err)
+          }
+        })()
+      },[])
     const errors ={}
     const validateErrors =()=>{
         if(domain.trim().length === 0){
@@ -17,6 +29,7 @@ export default function HostedZone (){
         }
     }
     const handleFileChange = (e) => {
+        e.preventDefault()
         setFile(e.target.files[0]);
     }
     const formData = {
@@ -34,6 +47,7 @@ export default function HostedZone (){
         setDomain('')
         console.log(response.data)
         alert('file upoladed successfully and new hosted zones created.')
+        setHostedZone([...hostedZone,response.data])
         }catch(err){
             alert(err.response.data)
             console.log(err)
@@ -43,8 +57,6 @@ export default function HostedZone (){
         e.preventDefault()
         validateErrors()
         if(_.isEmpty(errors)){
-
-        
         try{
             const response = await axios.post('https://dns-manager-x1h3.onrender.com/api/domain',formData,{ headers: {
                 Authorization: localStorage.getItem('token')
@@ -52,10 +64,7 @@ export default function HostedZone (){
             console.log(response.data)
             setFormErrors({})
             alert('hosted zone created succesfully')
-            dispatchHostedZone({
-                type: 'ADD_HOSTEDZONE',
-                payload: response.data
-            })
+            setHostedZone([...hostedZone,response.data])
         }catch(err){
             setFormErrors({})
             console.log(err)
@@ -75,7 +84,9 @@ export default function HostedZone (){
                 }})
                 console.log(response.data.deletedDomain)
                 alert('hosted zone deleted successfully')
-                dispatchHostedZone({type:'REMOVE_HOSTEDZONE',payload: response.data.deletedDomain})
+                setHostedZone(hostedZone.filter((ele)=>{
+                    return ele.zoneId!=id;
+                }))
             }catch(err){
                 console.log(err)
                 alert(err.response.data.errors.message)
@@ -113,9 +124,9 @@ export default function HostedZone (){
             </div>
             </div>
             
-            {hostedZone.domain&&
+            {
             <div>
-                <h2>your hosted zone - {hostedZone.domain.length}</h2>
+                <h2>your hosted zone - {hostedZone.length}</h2>
                 <input type= "text" 
                     value={search}
                     placeholder='search'
@@ -123,11 +134,11 @@ export default function HostedZone (){
                         setSeacrh(e.target.value);
                     }}/>
                     <ol>
-                    {hostedZone.domain.filter((ele)=>{
+                    {hostedZone.filter((ele)=>{
                         return ele.name.toLowerCase().includes(search.toLowerCase()) 
                         }).map((domain)=>{
                         return (
-                            <li key={domain._id}><Link to={`/hosted-zone/${domain.zoneId}/record`}>{domain.name}</Link><button onClick={()=>{
+                            <li key={domain._id}><Link to={`/hostedZone/${domain.zoneId}/record`}>{domain.name}</Link><button onClick={()=>{
                                 hanndleRemove(domain.zoneId);
                             }}>remove</button></li>
                         )

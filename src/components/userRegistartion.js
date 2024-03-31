@@ -68,7 +68,6 @@ export default function Register(){
                 console.log(serverError)
                 setServerError(serverErrors)
                 setFormError({})
-                
             }   
         }else{
             setFormError(errors)
