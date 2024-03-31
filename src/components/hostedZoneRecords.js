@@ -18,7 +18,7 @@ export default function Records(){
     const [editId,setEditId] = useState('')
     const [dnsRecords,setDnsRecords] = useState([])
     const dnsRecord = dnsRecords.find((ele)=>{
-        return ele._id ==editId
+        return ele._id === editId
     })
     console.log(dnsRecord)
     const [search,setSeacrh] = useState('')
@@ -131,7 +131,7 @@ export default function Records(){
     
     return(
         <div className='App'>
-            {hostedZoneId&&(
+            {hostedZone.domain&&(
             <div className='row justify-content-center'>
             <div className='col-md-4'>
             <h2>create record for - {hostedZoneId.name} </h2>
@@ -263,7 +263,7 @@ export default function Records(){
             </table>
             </div>
             </div>
-        <Modal>
+        <Modal isOpen={modal} toggle={toggle}> 
             <ModalHeader toggle={toggle}> Edit record</ModalHeader>
             <ModalBody>
             <form onSubmit={(e)=>{

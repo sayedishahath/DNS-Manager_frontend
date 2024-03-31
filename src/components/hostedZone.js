@@ -78,7 +78,7 @@ export default function HostedZone (){
                 dispatchHostedZone({type:'REMOVE_HOSTEDZONE',payload: response.data.deletedDomain})
             }catch(err){
                 console.log(err)
-                alert(err.response.data.message)
+                alert(err.response.data.errors.message)
             }
         }
     }
@@ -113,7 +113,7 @@ export default function HostedZone (){
             </div>
             </div>
             
-            {
+            {hostedZone.domain&&
             <div>
                 <h2>your hosted zone - {hostedZone.domain.length}</h2>
                 <input type= "text" 
