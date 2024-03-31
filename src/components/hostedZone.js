@@ -113,7 +113,7 @@ export default function HostedZone (){
             </div>
             </div>
             
-            {hostedZone.domain&&
+            {
             <div>
                 <h2>your hosted zone - {hostedZone.domain.length}</h2>
                 <input type= "text" 
