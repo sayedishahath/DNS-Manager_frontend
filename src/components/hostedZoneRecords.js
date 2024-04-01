@@ -15,12 +15,14 @@ export default function Records(props){
     const hostedZoneId = hostedZone.find((ele)=>{
         return ele.zoneId ===zoneId
     })
+    const hostedZoneName = hostedZoneId ? hostedZoneId.name : '';
     const [editId,setEditId] = useState('')
     const [dnsRecords,setDnsRecords] = useState([])
     const dnsRecord = dnsRecords.find((ele)=>{
         return ele._id === editId
     })
-    console.log(dnsRecord)
+    // console.log(dnsRecord)
+    const [loading,setLoading] = useState(false)
     const [search,setSeacrh] = useState('')
     const [domain,setDomain] =useState('')
     const [recordType, setRecordType] = useState(dnsRecord?dnsRecord.recordType:'');
@@ -52,27 +54,33 @@ export default function Records(props){
         e.preventDefault()
         let fd= new FormData();
         fd.append("file", file);
+        setLoading(true)
         try{
             const response = await axios.post(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneId}/upload-record`,fd, {
                 headers: {
                  Authorization:localStorage.getItem('token'), 'Content-Type': 'multipart/form-data'
         }})
         console.log(response.data)
+        setLoading(false)
         alert('file uploaded succesfully and new records created')
         }catch(err){
+            setLoading(false)
             alert(err.response.data.message)
             console.log(err)
         }
     }
     useEffect(()=>{
         (async()=>{
+            setLoading(true)
             try{
                 const response = await  axios.get(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneId}`,{headers:{
                     Authorization:localStorage.getItem('token')
                 }})
                 console.log(response.data);
                 setDnsRecords(response.data)
+                setLoading(false)
             }catch(err){
+                setLoading(false)
                 alert(err.message)
             }
         })()
@@ -86,18 +94,21 @@ export default function Records(props){
     const handleSubmit=async(e)=>{
         e.preventDefault()
         validateErrors()
+        setLoading(true)
         if(_.isEmpty(errors)){        
         try{
             const response = await axios.post(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneId}`,formData,{headers:{
                 Authorization:localStorage.getItem("token")
             }});
-            console.log(response);
+            console.log(response.data);
             setFormErrors({})
+            setLoading(false)
             alert('new record added')
-            setDnsRecords([...dnsRecords,response.data]);
+            setDnsRecords([...dnsRecords,response.data.newDNSRecord]);
         }catch(err){
             setFormErrors({})
             // console.log(err);
+            setLoading(false)
             alert(err.response.data.error.message)
         }
     }else{
@@ -105,41 +116,50 @@ export default function Records(props){
     }
     }
 
-    const handleDelete=async(id,zoneid)=>{
-       const confirmation = window.confirm( "Are you sure to delete this Record ?")
-       if(confirmation){
-        try{
-            const response = await axios.delete(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneid}/${id}`,{headers:{
-                Authorization:localStorage.getItem('token')
-            }})
-            // console.log(response.data)
-            alert('record deleted successfully')
-            setDnsRecords(dnsRecord.filter((ele)=>{
-                return ele.deleteDNSRecord._id !==id
-            })) 
-        }catch(err){
-            alert(err.response.data)
-            // console.log(err.response.data)
+    const handleDelete = async (id, zoneid) => {
+        const confirmation = window.confirm("Are you sure you want to delete this Record ?");
+        setLoading(true)
+        if (confirmation) {
+            try {
+                await axios.delete(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneid}/${id}`, {
+                    headers: {
+                        Authorization: localStorage.getItem('token')
+                    }
+                });
+                setLoading(false)
+                alert('Record deleted successfully');
+                setDnsRecords(dnsRecords.filter(ele => ele._id !== id));
+            } catch(err) {
+                setLoading(false)
+                if (err.response && err.response.data) {
+                    alert(err.response.data);
+                } else {
+                    alert('An error occurred while deleting the record.');
+                }
+            }
         }
-       }
     }
+    
     const handleUpdate = async(e,id)=>{
+        setLoading(true)
         e.preventDefault()
         try{
             const response = await axios.put(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneId}/${id}`,formData,{headers:{
                 Authorization:localStorage.getItem('token')
             }})
             console.log(response.data)
+            setLoading(false)
             alert('record updated successfully')
             setDnsRecords(dnsRecords.map((ele)=> {
                if (ele._id === id) {
-                   return response.data
+                   return response.data.updatedDNSRecord
                } else {
                    return ele;
                }
            })
           )
         }catch(err){
+            setLoading(false)
             alert(err.message)
             console.log(err)
         }
@@ -147,10 +167,13 @@ export default function Records(props){
     
     return(
         <div className='App'>
-            
+            {loading?<div className="loader align-items-center">
+                <img src="./loader.gif" alt="loading..."/>
+            </div>:
+            <div>
             <div className='row justify-content-center'>
             <div className='col-md-4'>
-            <h2>create record -{hostedZoneId&&hostedZoneId.name}</h2>
+            <h2>create record -{hostedZoneName}</h2>
             <form onSubmit={handleSubmit}>
                 <div className='form-group'>
                 <label className='form-label' htmlFor="domain">Domain:</label>
@@ -254,27 +277,28 @@ export default function Records(props){
                     </tr>
                 </thead>
                 <tbody>
-                    {dnsRecords.filter((ele)=>{
-                        return ele.recordType.toLowerCase().includes(search.toLowerCase())
-                    }).map((ele)=>{
-                        return(
+                {dnsRecords.filter((ele) => ele && ele.recordType && ele.recordType.toLowerCase().includes(search.toLowerCase()))
+                    .map((ele) => {
+                        return (
                             <tr key={ele._id}>
                                 <td>{ele.domain}</td>
                                 <td>{ele.recordType}</td>
                                 <td>{ele.recordValue}</td>
                                 <td>{ele.ttl}</td>
-                                <td><button
-                                onClick={()=>{
-                                    handleDelete(ele._id,ele.zoneId)
-                                }}>
-                                    Delete
+                                <td>
+                                    <button
+                                        onClick={() => {
+                                            handleDelete(ele._id, ele.zoneId)
+                                        }}>
+                                        Delete
                                     </button>
-                                    <button onClick={()=>{
+                                    <button onClick={() => {
                                         setEditId(ele._id)
                                         toggle()
                                     }}>
-                                    Edit
-                                    </button></td>
+                                        Edit
+                                    </button>
+                                </td>
                             </tr>
                         )
                     })}
@@ -337,6 +361,6 @@ export default function Records(props){
                 </form>
             </ModalBody>
       </Modal>
-    </div>
+      </div>}</div>
     )
 }

@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { useNavigate ,Link } from 'react-router-dom'
 export default function Register(){
     const navigate =useNavigate()
-
+    const [loading,setLoading] = useState(false)
     const [name,setName] =useState('')
     const [email,setEmail]=useState('')
     const [password,setPassword] =useState('')
@@ -36,11 +36,13 @@ export default function Register(){
             password:password,
         }
         validateErrors()
+        setLoading(true)
         if(_.isEmpty(errors)){
             try{
                 const response =await axios.post('https://dns-manager-x1h3.onrender.com/api/register',formData)
                 console.log(response.data)
                 alert('registered succesfully')
+                setLoading(false)
                 setFormError({})
                 setServerError({
                     name:'',
@@ -68,6 +70,7 @@ export default function Register(){
                 console.log(serverError)
                 setServerError(serverErrors)
                 setFormError({})
+                setLoading(false)
             }   
         }else{
             setFormError(errors)
@@ -81,9 +84,14 @@ export default function Register(){
     }
     
     return(
+        
         <div className='row justify-content-center' >
+            {loading?<div className="loader justify-content-center">
+                <img src="./loader.gif" alt="loading..."/>
+            </div>:
             <div className='col-md-4'>
             <h3>Sign Up Here!</h3>
+            
             <form onSubmit ={handleSubmit}>
                 <div className='form-group'>
                 <label className='form-label' htmlFor="name">Name:</label>
@@ -128,6 +136,6 @@ export default function Register(){
             
             <h5>already have an acount <Link to="/login" >login</Link> here</h5>
             </div>
-        </div>
+        }</div>
     )
 }

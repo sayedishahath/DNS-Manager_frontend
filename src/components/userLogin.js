@@ -6,6 +6,7 @@ import { useUserContext } from '../context/userContext';
 export default function Login(props){
     const navigate = useNavigate()
     const { dispatch } = useUserContext();
+    const [loading,setLoading] = useState(false)
     const [email,setEmail]=useState('')
     const [password, setPassword] = useState('')
     const [loggedInUser,setLoggedInUser] = useState(null)
@@ -31,6 +32,7 @@ export default function Login(props){
             password:password
         }
         validateErrors()
+        setLoading(true)
         if(_.isEmpty(errors)){
             try{
                 const response = await axios.post('https://dns-manager-x1h3.onrender.com/api/login',formData)
@@ -41,6 +43,7 @@ export default function Login(props){
                 localStorage.setItem('token',token)
                 alert('login success')
                 props.loginSuccess()
+                setLoading(false)
                 setEmail('')
                 setPassword('')
                 setServerError("")
@@ -48,6 +51,7 @@ export default function Login(props){
                 navigate('/hostedZone')
             }catch(err){
                 alert(err)
+                setLoading(false)
                 const errors = err.response.data.error
                 console.log(serverError)
                 setServerError(errors)
@@ -61,6 +65,10 @@ export default function Login(props){
     }
     return(
         <div>
+            {loading?<div className="loader align-items-center">
+                <img src="./loader.gif" alt="loading..."/>
+            </div>:
+            <div>
             <h2>Login</h2>
             <div className='row justify-content-center'>
             <div className='col-md-4'>
@@ -93,6 +101,8 @@ export default function Login(props){
             </form></div>
             </div>
             <hr/>
+            </div>
+            }
         </div>
     )
 }

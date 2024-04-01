@@ -8,6 +8,7 @@ export default function HostedZone (props){
     const [file, setFile] = useState(null);
     const [search,setSeacrh]= useState('')
     const [formErrors,setFormErrors]=useState({})
+    const [loading,setLoading] =useState(false)
 
     useEffect(()=>{
         (async()=>{
@@ -39,23 +40,27 @@ export default function HostedZone (props){
         e.preventDefault()
         let fd= new FormData();
         fd.append("file", file);
+        setLoading(true)
         try{
             const response = await axios.post('https://dns-manager-x1h3.onrender.com/api/domain/upload',fd, {
                 headers: {
                  Authorization:localStorage.getItem('token'), 'Content-Type': 'multipart/form-data'
         }})
         setDomain('')
-        console.log(response.data)
+        console.log(response)
+        setLoading(false)
         alert('file upoladed successfully and new hosted zones created.')
         setHostedZone([...hostedZone,response.data])
         }catch(err){
-            alert(err.response.data)
+            setLoading(false)
+            alert(err.message)
             console.log(err)
         }
     }
     const handleSubmit =async(e)=>{
         e.preventDefault()
         validateErrors()
+        setLoading(true)
         if(_.isEmpty(errors)){
         try{
             const response = await axios.post('https://dns-manager-x1h3.onrender.com/api/domain',formData,{ headers: {
@@ -63,11 +68,13 @@ export default function HostedZone (props){
             }})
             console.log(response.data)
             setFormErrors({})
+            setLoading(false)
             alert('hosted zone created succesfully')
             setHostedZone([...hostedZone,response.data])
         }catch(err){
             setFormErrors({})
             console.log(err)
+            setLoading(false)
             alert(err.response.data.message)
         }
     }else{
@@ -77,18 +84,21 @@ export default function HostedZone (props){
    
     const hanndleRemove =async(id)=>{
         const confirmation = window.confirm("are you sure?")
+        setLoading(true)
         if(confirmation){
             try{
                 const response = await axios.delete(`https://dns-manager-x1h3.onrender.com/api/domain/${id}`,{headers:{
                     Authorization :localStorage.getItem('token')
                 }})
                 console.log(response.data.deletedDomain)
+                setLoading(false)
                 alert('hosted zone deleted successfully')
                 setHostedZone(hostedZone.filter((ele)=>{
                     return ele.zoneId!=id;
                 }))
             }catch(err){
                 console.log(err)
+                setLoading(false)
                 alert(err.response.data.errors.message)
             }
         }
@@ -96,6 +106,10 @@ export default function HostedZone (props){
     return (
         
         <div className="row justify-content-center">
+            {loading?<div className="loader align-items-center">
+                <img src="./loader.gif" alt="loading..."/>
+            </div>:
+            <div>
             <h2>Create new Hosted Zone</h2>
             <div className="col-md-4">
             <form onSubmit={handleSubmit}>
@@ -135,7 +149,7 @@ export default function HostedZone (props){
                     }}/>
                     <ol>
                     {hostedZone.filter((ele)=>{
-                        return ele.name.toLowerCase().includes(search.toLowerCase()) 
+                        return ele&&ele.name&&ele.name.toLowerCase().includes(search.toLowerCase()) 
                         }).map((domain)=>{
                         return (
                             <li key={domain._id}><Link to={`/hostedZone/${domain.zoneId}/record`}>{domain.name}</Link><button onClick={()=>{
@@ -146,6 +160,7 @@ export default function HostedZone (props){
                     </ol>
             </div>}
             </div>
-        </div>
+            </div>
+            }</div>
     )
 }
