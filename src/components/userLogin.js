@@ -41,17 +41,17 @@ export default function Login(props){
                 setLoggedInUser(response.data.data)
                 const token = response.data.token
                 localStorage.setItem('token',token)
+                setLoading(false)
                 alert('login success')
                 props.loginSuccess()
-                setLoading(false)
                 setEmail('')
                 setPassword('')
                 setServerError("")
                 dispatch({ type: 'LOGIN' }); // Dispatch login action
                 navigate('/hostedZone')
             }catch(err){
-                alert(err)
                 setLoading(false)
+                alert(err)
                 const errors = err.response.data.error
                 console.log(serverError)
                 setServerError(errors)
@@ -80,6 +80,7 @@ export default function Login(props){
                 type="text"
                 value={email}
                 id="email"
+                placeholder='enter email '
                 onChange={(e)=>{
                     setEmail(e.target.value)
                 }} 
@@ -92,6 +93,7 @@ export default function Login(props){
                 type="password"
                 value={password}
                 id="password"
+                placeholder='enter password'
                 onChange={(e)=>{
                     setPassword(e.target.value)
                 }} 

@@ -63,6 +63,8 @@ export default function Records(props){
         console.log(response.data)
         setLoading(false)
         alert('file uploaded succesfully and new records created')
+        setDnsRecords([...dnsRecords,response.data.newDNSRecord]);
+        window.location.reload();
         }catch(err){
             setLoading(false)
             alert(err.response.data.message)
@@ -180,6 +182,7 @@ export default function Records(props){
                 <input type="text" 
                 id="domain" 
                 name='domain'
+                placeholder='enter selected domain name'
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)} 
                 className='form-control'/>
@@ -217,6 +220,7 @@ export default function Records(props){
                 <input type="text" 
                 id="recordValue" 
                 name='recordValue'
+                placeholder='enter record value in correct format'
                 value={recordValue} 
                 onChange={(e) => setRecordValue(e.target.value)} 
                 className={'form-control' + (formErrors.recordValue?  ' is-invalid' : '')}/>
@@ -228,6 +232,7 @@ export default function Records(props){
                 id="ttl" 
                 name='ttl'
                 value={ttl} 
+                placeholder='enter ttl'
                 onChange={(e) => setTtl(e.target.value)} 
                 className={'form-control' + (formErrors.ttl  ?  ' is-invalid' : '')}/>
                 {formErrors.ttl&&<span className='invalid feedback'>{formErrors.ttl}</span>}<br/>

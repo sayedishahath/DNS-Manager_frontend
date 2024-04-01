@@ -41,8 +41,8 @@ export default function Register(){
             try{
                 const response =await axios.post('https://dns-manager-x1h3.onrender.com/api/register',formData)
                 console.log(response.data)
-                alert('registered succesfully')
                 setLoading(false)
+                alert('registered succesfully')
                 setFormError({})
                 setServerError({
                     name:'',
@@ -98,6 +98,8 @@ export default function Register(){
                 <input 
                 type="text"
                 value={name}
+                id="name"
+                placeholder="enter your name"
                 onChange={(e)=>{
                     setName(e.target.value)
                 }} 
@@ -110,6 +112,8 @@ export default function Register(){
                 <input 
                 type="text"
                 value={email}
+                id="email"
+                placeholder='enter email'
                 onChange={(e)=>{
                     setEmail(e.target.value)
                 }} 
@@ -123,6 +127,8 @@ export default function Register(){
                 <input 
                 type="password"
                 value={password}
+                id='password'
+                placeholder='Create Password'
                 onChange={(e)=>{
                     setPassword(e.target.value)
                     console.log(password)

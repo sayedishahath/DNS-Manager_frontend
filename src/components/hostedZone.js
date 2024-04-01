@@ -51,6 +51,7 @@ export default function HostedZone (props){
         setLoading(false)
         alert('file upoladed successfully and new hosted zones created.')
         setHostedZone([...hostedZone,response.data])
+        window.location.reload()
         }catch(err){
             setLoading(false)
             alert(err.message)
@@ -104,12 +105,13 @@ export default function HostedZone (props){
         }
     }
     return (
-        
-        <div className="row justify-content-center">
-            {loading?<div className="loader align-items-center">
+        <div className="App">
+        {loading?<div className="loader align-items-center">
                 <img src="./loader.gif" alt="loading..."/>
             </div>:
             <div>
+        <div className="row justify-content-center">
+            
             <h2>Create new Hosted Zone</h2>
             <div className="col-md-4">
             <form onSubmit={handleSubmit}>
@@ -120,6 +122,7 @@ export default function HostedZone (props){
                     name="domain"
                     id="domain"
                     value={domain}
+                    placeholder="enter domain name"
                     onChange={(e)=>{
                         setDomain(e.target.value)
                     }}
@@ -161,6 +164,7 @@ export default function HostedZone (props){
             </div>}
             </div>
             </div>
-            }</div>
+            </div>
+        }</div>
     )
 }
