@@ -32,9 +32,9 @@ export default function Records(props){
     
     const errors = {}
     const validateErrors = ()=>{
-        if(domain.trim().length===0){
-            errors.domain ='domain is required'
-        }
+        // if(domain.trim().length===0){
+        //     errors.domain ='domain is required'
+        // }
         if(recordType.trim().length === 0){
             errors.recordType = 'record type is required'
         }
@@ -60,7 +60,7 @@ export default function Records(props){
                 headers: {
                  Authorization:localStorage.getItem('token'), 'Content-Type': 'multipart/form-data'
         }})
-        console.log(response.data)
+        console.log(response.data.newDNSRecord)
         setLoading(false)
         alert('file uploaded succesfully and new records created')
         setDnsRecords([...dnsRecords,response.data.newDNSRecord]);
@@ -78,9 +78,9 @@ export default function Records(props){
                 const response = await  axios.get(`https://dns-manager-x1h3.onrender.com/api/dns/${zoneId}`,{headers:{
                     Authorization:localStorage.getItem('token')
                 }})
+                setLoading(false)
                 console.log(response.data);
                 setDnsRecords(response.data)
-                setLoading(false)
             }catch(err){
                 setLoading(false)
                 alert(err.message)
@@ -88,7 +88,7 @@ export default function Records(props){
         })()
     },[])
     const formData={
-        domain: domain,
+        domain: hostedZoneName,
         recordType: recordType,
         recordValue: recordValue,
         ttl : ttl
@@ -114,6 +114,7 @@ export default function Records(props){
             alert(err.response.data.error.message)
         }
     }else{
+        setLoading(false)
         setFormErrors(errors)
     }
     }
@@ -177,7 +178,7 @@ export default function Records(props){
             <div className='col-md-4'>
             <h2>create record -{hostedZoneName}</h2>
             <form onSubmit={handleSubmit}>
-                <div className='form-group'>
+                {/* <div className='form-group'>
                 <label className='form-label' htmlFor="domain">Domain:</label>
                 <input type="text" 
                 id="domain" 
@@ -186,7 +187,7 @@ export default function Records(props){
                 value={domain}
                 onChange={(e) => setDomain(e.target.value)} 
                 className='form-control'/>
-                </div>
+                </div> */}
                 <div className='form-group'>
                 <label className='form-label' htmlFor="recordType">Record Type:</label>
                     <select 
@@ -208,7 +209,7 @@ export default function Records(props){
                         <option value="NS">NS</option>
                         <option value="SOA">SOA</option>
                 </select>
-                {formErrors.recordType&&<span className='invalid-feedback'>{formErrors.recordType}</span>}<br/>
+                {formErrors.recordType&&<span className='invalid-feedback'>{formErrors.recordType}</span>}
                 {/* <input type="text" 
                 id="recordType" 
                 name='recordType'
@@ -224,7 +225,7 @@ export default function Records(props){
                 value={recordValue} 
                 onChange={(e) => setRecordValue(e.target.value)} 
                 className={'form-control' + (formErrors.recordValue?  ' is-invalid' : '')}/>
-                {formErrors.recordValue&&<span className='invalid-feedback'>{formErrors.recordValue}</span>}<br/>
+                {formErrors.recordValue&&<span className='invalid-feedback'>{formErrors.recordValue}</span>}
                 </div>
                 <div className='form-group'>
                 <label className='form-label' htmlFor="ttl">TTL (seconds):</label>
@@ -235,9 +236,12 @@ export default function Records(props){
                 placeholder='enter ttl'
                 onChange={(e) => setTtl(e.target.value)} 
                 className={'form-control' + (formErrors.ttl  ?  ' is-invalid' : '')}/>
-                {formErrors.ttl&&<span className='invalid feedback'>{formErrors.ttl}</span>}<br/>
+                {formErrors.ttl&&<span className='invalid-feedback'>{formErrors.ttl}</span>}
                 </div>
-                <input type='submit' className='btn btn-primary'/>
+                <div className='form-group'>
+                    <input type='submit' className='btn btn-primary'/>
+                </div>
+                
             </form>
 
             <form onSubmit={handleFileUpload}>

@@ -4,6 +4,7 @@ import axios from 'axios'
 import { Link } from "react-router-dom"
 export default function HostedZone (props){
     const {hostedZone,setHostedZone} =props
+    // const [hostedZone,setHostedZone] = useState([])
     const [domain,setDomain] =useState('')
     const [file, setFile] = useState(null);
     const [search,setSeacrh]= useState('')
@@ -79,6 +80,7 @@ export default function HostedZone (props){
             alert(err.response.data.message)
         }
     }else{
+        setLoading(false)
         setFormErrors(errors)
     }
     }
@@ -118,6 +120,7 @@ export default function HostedZone (props){
                 <div className="form-group">
                 <label className="form-label" htmlFor="domain">Domain: </label>
                 <input 
+                    // required
                     type="text"
                     name="domain"
                     id="domain"

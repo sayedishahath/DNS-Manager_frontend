@@ -6,7 +6,7 @@ import Login from  './components/userLogin'
 import HostedZone from './components/hostedZone';
 import Records from './components/hostedZoneRecords'
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useParams} from "react-router-dom";
 
 
@@ -26,6 +26,7 @@ function App() {
       setUserLoggedIn(false)
       localStorage.removeItem('token')
       setLoading(false)
+      setHostedZone([])
     }
   }
   
@@ -43,6 +44,8 @@ function App() {
   //     }
   //   })()
   // },[dispatchHostedZone])
+
+  
 
   return (
     // <div className="App">
