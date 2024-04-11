@@ -10,7 +10,7 @@ export default function HostedZone (props){
     const [search,setSeacrh]= useState('')
     const [formErrors,setFormErrors]=useState({})
     const [loading,setLoading] =useState(false)
-
+    
     useEffect(()=>{
         (async()=>{
           try{
@@ -104,6 +104,9 @@ export default function HostedZone (props){
                 setLoading(false)
                 alert(err.response.data.errors.message)
             }
+        }
+        else{
+            setLoading(false)
         }
     }
     return (

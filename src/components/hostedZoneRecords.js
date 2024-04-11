@@ -11,8 +11,23 @@ export default function Records(props){
         setModal(!modal)
     }
     const {zoneId} = useParams()
-    const {hostedZone} = props
-    const hostedZoneId = hostedZone.find((ele)=>{
+    // const {hostedZone} = props
+    const [hostedZone,setHostedZone] = useState([])
+    
+    useEffect(()=>{
+        (async()=>{
+          try{
+            const response = await axios.get('https://dns-manager-x1h3.onrender.com/api/domain',{headers:{
+              Authorization:localStorage.getItem('token')
+            }})
+            setHostedZone(response.data)
+          }catch(err){
+            alert(err.message)
+            console.log(err)
+          }
+        })()
+      },[])
+    const hostedZoneId = hostedZone&&hostedZone.find((ele)=>{
         return ele.zoneId ===zoneId
     })
     const hostedZoneName = hostedZoneId ? hostedZoneId.name : '';
@@ -65,6 +80,7 @@ export default function Records(props){
         alert('file uploaded succesfully and new records created')
         setDnsRecords([...dnsRecords,response.data.newDNSRecord]);
         window.location.reload();
+        console.log(hostedZone)
         }catch(err){
             setLoading(false)
             alert(err.response.data.message)
@@ -86,7 +102,7 @@ export default function Records(props){
                 alert(err.message)
             }
         })()
-    },[])
+    },[zoneId])
     const formData={
         domain: hostedZoneName,
         recordType: recordType,
@@ -136,10 +152,14 @@ export default function Records(props){
                 setLoading(false)
                 if (err.response && err.response.data) {
                     alert(err.response.data);
+                    console.log(err)
                 } else {
                     alert('An error occurred while deleting the record.');
                 }
             }
+        }
+        else{
+            setLoading(false)
         }
     }
     
@@ -153,6 +173,7 @@ export default function Records(props){
             console.log(response.data)
             setLoading(false)
             alert('record updated successfully')
+            window.location.reload(); 
             setDnsRecords(dnsRecords.map((ele)=> {
                if (ele._id === id) {
                    return response.data.updatedDNSRecord
@@ -322,13 +343,13 @@ export default function Records(props){
                 handleUpdate(e,editId)
             }}>    
                     
-                    <label htmlFor="domain">Domain:</label>
+                    {/* <label htmlFor="domain">Domain:</label>
                     <input type="text" 
                     id="domain" 
                     name='domain'
                     value={domain}
                     onChange={(e) => setDomain(e.target.value)} 
-                    />
+                    /> */}
                 
                     <label htmlFor="recordType">Record Type:</label>
                         <select 

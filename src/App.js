@@ -31,41 +31,22 @@ function App() {
   }
   
   // useEffect(()=>{
+    
   //   (async()=>{
   //     try{
   //       const response = await axios.get('https://dns-manager-x1h3.onrender.com/api/domain',{headers:{
   //         Authorization:localStorage.getItem('token')
   //       }})
-
-  //       dispatchHostedZone({type:'GET_HOSTEDZONE',payload:response.data})
+  //       setHostedZone(response.data)
   //     }catch(err){
   //       alert(err.message)
   //       console.log(err)
   //     }
   //   })()
-  // },[dispatchHostedZone])
-
   
+  // },[])
 
   return (
-    // <div className="App">
-    //   <BrowserRouter>
-    //     <div>
-    //       <h1>DNS Manager</h1>
-    //       <UserContext.Provider value={{hostedZone,dispatchHostedZone}}>
-    //         {!userLoggedIn&&<Register/>}
-    //         <Routes>
-    //           <Route path="/login" element={<Login loginSuccess={loginSuccess} />} />
-    //           <Route path='/hostedZone' element={<HostedZone/>}/>
-    //           <Route path = '/hosted-zone/:zoneId/record' element={<Records/>}/>
-    //           <Route path = '/logout' element ={<Login loginSuccess={loginSuccess}/>}/>
-    //         </Routes>
-    //       {userLoggedIn&&<Link to ='/logout' onClick={logout}>logout</Link>}
-    //       </UserContext.Provider>
-    //     </div>
-    //   </BrowserRouter>
-    // </div>
-
 
     <div className="App">
       {loading?<div className="loader align-items-center">
